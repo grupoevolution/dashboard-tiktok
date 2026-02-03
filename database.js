@@ -6,7 +6,22 @@ const path = require('path');
 class DatabaseManager {
     constructor() {
         const dbPath = path.join(__dirname, 'tiktok_shop.db');
+        
+        // Criar diretório se não existir
+        const dbDir = path.dirname(dbPath);
+        if (!fs.existsSync(dbDir)) {
+            fs.mkdirSync(dbDir, { recursive: true });
+        }
+
+        // Verificar se o arquivo existe, se não, criar vazio
+        if (!fs.existsSync(dbPath)) {
+            console.log('📝 Criando novo banco de dados...');
+            fs.writeFileSync(dbPath, '');
+        }
+
         this.db = new Database(dbPath);
+        console.log(`✅ Banco de dados conectado: ${dbPath}`);
+        
         this.initDatabase();
         this.setupBackup();
     }
@@ -103,7 +118,7 @@ class DatabaseManager {
 
     setupBackup() {
         // Criar pasta de backups se não existir
-        const backupDir = path.join(__dirname, '..', 'backups');
+        const backupDir = path.join(__dirname, 'backups');
         if (!fs.existsSync(backupDir)) {
             fs.mkdirSync(backupDir, { recursive: true });
         }
@@ -131,7 +146,7 @@ class DatabaseManager {
 
     createBackup() {
         try {
-            const backupDir = path.join(__dirname, '..', 'backups');
+            const backupDir = path.join(__dirname, 'backups');
             const timestamp = new Date().toISOString().split('T')[0];
             const backupPath = path.join(backupDir, `backup_${timestamp}.db`);
             
