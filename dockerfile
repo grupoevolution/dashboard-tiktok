@@ -1,14 +1,18 @@
 FROM node:18-alpine
 
-# Instalar dependências necessárias
-RUN apk add --no-cache python3 make g++
-
 # Criar diretório da aplicação
 WORKDIR /app
 
 # Copiar package.json e instalar dependências
 COPY package*.json ./
-RUN npm install --production
+
+# Instalar dependências de build necessárias para better-sqlite3
+RUN apk add --no-cache --virtual .build-deps \
+    python3 \
+    make \
+    g++ \
+    && npm install --production \
+    && apk del .build-deps
 
 # Copiar código da aplicação
 COPY . .
