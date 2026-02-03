@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  tiktok-dashboard:
+    build: .
+    container_name: tiktok-shop-dashboard
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - JWT_SECRET=${JWT_SECRET:-sua_chave_secreta_mude_isso_123456789}
+      - DEFAULT_USERNAME=${DEFAULT_USERNAME:-admin}
+      - DEFAULT_PASSWORD=${DEFAULT_PASSWORD:-admin123}
+      - NODE_ENV=production
+    volumes:
+      - ./tiktok_shop.db:/app/tiktok_shop.db
+      - ./backups:/app/backups
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
