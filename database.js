@@ -5,22 +5,19 @@ const path = require('path');
 
 class DatabaseManager {
     constructor() {
-        const dbPath = path.join(__dirname, 'tiktok_shop.db');
-        
-        // Criar diretório se não existir
-        const dbDir = path.dirname(dbPath);
-        if (!fs.existsSync(dbDir)) {
-            fs.mkdirSync(dbDir, { recursive: true });
+        // Criar diretório de dados se não existir
+        const dataDir = path.join(__dirname, 'data');
+        if (!fs.existsSync(dataDir)) {
+            fs.mkdirSync(dataDir, { recursive: true });
+            console.log('📁 Diretório de dados criado');
         }
 
-        // Verificar se o arquivo existe, se não, criar vazio
-        if (!fs.existsSync(dbPath)) {
-            console.log('📝 Criando novo banco de dados...');
-            fs.writeFileSync(dbPath, '');
-        }
+        // Banco dentro da pasta data
+        const dbPath = path.join(dataDir, 'tiktok_shop.db');
+        console.log(`📍 Caminho do banco: ${dbPath}`);
 
         this.db = new Database(dbPath);
-        console.log(`✅ Banco de dados conectado: ${dbPath}`);
+        console.log(`✅ Banco de dados conectado`);
         
         this.initDatabase();
         this.setupBackup();
@@ -121,6 +118,7 @@ class DatabaseManager {
         const backupDir = path.join(__dirname, 'backups');
         if (!fs.existsSync(backupDir)) {
             fs.mkdirSync(backupDir, { recursive: true });
+            console.log('📁 Diretório de backups criado');
         }
 
         // Backup diário às 3h da manhã
@@ -137,7 +135,7 @@ class DatabaseManager {
             
             setTimeout(() => {
                 this.createBackup();
-                scheduleBackup(); // Agendar próximo backup
+                scheduleBackup();
             }, timeUntilBackup);
         };
 
@@ -154,7 +152,6 @@ class DatabaseManager {
             
             console.log(`✅ Backup criado: ${backupPath}`);
             
-            // Manter apenas últimos 30 backups
             this.cleanOldBackups(backupDir);
         } catch (error) {
             console.error('❌ Erro ao criar backup:', error);
@@ -172,7 +169,6 @@ class DatabaseManager {
                 }))
                 .sort((a, b) => b.time - a.time);
 
-            // Remover backups antigos (manter apenas 30)
             if (files.length > 30) {
                 files.slice(30).forEach(file => {
                     fs.unlinkSync(file.path);
@@ -207,7 +203,6 @@ class DatabaseManager {
     }
 
     createProfile(name, color = null) {
-        // Gerar cor aleatória se não fornecida
         if (!color) {
             color = '#' + Math.floor(Math.random()*16777215).toString(16);
         }
@@ -219,7 +214,6 @@ class DatabaseManager {
     }
 
     deleteProfile(id) {
-        // Soft delete
         return this.db.prepare('UPDATE profiles SET active = 0 WHERE id = ?').run(id);
     }
 
